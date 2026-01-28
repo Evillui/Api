@@ -2,27 +2,32 @@ package com.example.app.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.app.ui.screens.FavoritesScreen
 import com.example.app.ui.screens.WeatherDetailScreen
 import com.example.app.ui.screens.WeatherListScreen
-import com.example.app.ui.viewmodel.WeatherEvent
-import com.example.app.ui.viewmodel.WeatherViewModel
+import com.example.app.viewmodel.WeatherEvent
+import com.example.app.viewmodel.WeatherUiState
+import com.example.app.viewmodel.WeatherViewModel
 
 object Routes {
     const val WEATHER_LIST = "weather_list"
-    const val WEATHER_DETAIL = "weather_detail"
+    const val WEATHER_DETAIL = "weather_detail/{id}"
     const val FAVORITES = "favorites"
+
+    fun detail(id: Int) = "weather_detail/$id"
 }
 
 @Composable
 fun AppNavigation(viewModel: WeatherViewModel) {
     val navController = rememberNavController()
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.observeAsState(WeatherUiState())
 
     NavHost(
         navController = navController,
@@ -31,12 +36,9 @@ fun AppNavigation(viewModel: WeatherViewModel) {
         composable(Routes.WEATHER_LIST) {
             WeatherListScreen(
                 uiState = uiState,
-                onEvent = { event ->
-                    viewModel.onEvent(event)
-                },
+                onEvent = viewModel::onEvent,
                 onLocationClick = { location ->
-                    viewModel.onEvent(WeatherEvent.SelectLocation(location))
-                    navController.navigate(Routes.WEATHER_DETAIL)
+                    navController.navigate(Routes.detail(location.id))
                 },
                 onFavoritesClick = {
                     navController.navigate(Routes.FAVORITES)
@@ -44,18 +46,19 @@ fun AppNavigation(viewModel: WeatherViewModel) {
             )
         }
 
-        composable(Routes.WEATHER_DETAIL) {
-            LaunchedEffect(Unit) {
-                uiState.selectedLocation?.let {
-                    viewModel.onEvent(WeatherEvent.SelectLocation(it))
-                }
+        composable(
+            route = Routes.WEATHER_DETAIL,
+            arguments = listOf(navArgument("id") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val id = backStackEntry.arguments?.getInt("id") ?: return@composable
+
+            LaunchedEffect(id) {
+                viewModel.onEvent(WeatherEvent.OpenDetail(id))
             }
 
             WeatherDetailScreen(
                 uiState = uiState,
-                onEvent = { event ->
-                    viewModel.onEvent(event)
-                },
+                onEvent = viewModel::onEvent,
                 onBack = { navController.popBackStack() }
             )
         }
@@ -63,12 +66,9 @@ fun AppNavigation(viewModel: WeatherViewModel) {
         composable(Routes.FAVORITES) {
             FavoritesScreen(
                 uiState = uiState,
-                onEvent = { event ->
-                    viewModel.onEvent(event)
-                },
+                onEvent = viewModel::onEvent,
                 onLocationClick = { location ->
-                    viewModel.onEvent(WeatherEvent.SelectLocation(location))
-                    navController.navigate(Routes.WEATHER_DETAIL)
+                    navController.navigate(Routes.detail(location.id))
                 },
                 onBack = { navController.popBackStack() }
             )

@@ -16,8 +16,8 @@ import androidx.compose.ui.unit.dp
 import com.example.app.ui.components.ErrorState
 import com.example.app.ui.components.LocationItem
 import com.example.app.ui.components.LoadingState
-import com.example.app.ui.viewmodel.WeatherEvent
-import com.example.app.ui.viewmodel.WeatherUiState
+import com.example.app.viewmodel.WeatherEvent
+import com.example.app.viewmodel.WeatherUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -65,7 +65,6 @@ fun WeatherListScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            // Поле поиска
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
@@ -92,7 +91,6 @@ fun WeatherListScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Контент
             Box(modifier = Modifier.fillMaxSize()) {
                 when {
                     uiState.isLoading -> {

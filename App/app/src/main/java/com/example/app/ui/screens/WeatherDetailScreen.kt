@@ -17,8 +17,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.app.ui.components.ErrorState
 import com.example.app.ui.components.LoadingState
-import com.example.app.ui.viewmodel.WeatherEvent
-import com.example.app.ui.viewmodel.WeatherUiState
+import com.example.app.viewmodel.WeatherEvent
+import com.example.app.viewmodel.WeatherUiState
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -78,7 +78,8 @@ fun WeatherDetailScreen(
                 ErrorState(
                     message = uiState.errorDetail ?: "Error loading weather",
                     onRetry = {
-                        location?.let { onEvent(WeatherEvent.SelectLocation(it)) }
+                        val id = uiState.selectedLocation?.id
+                        if (id != null) onEvent(WeatherEvent.OpenDetail(id))
                     }
                 )
             }
@@ -100,7 +101,6 @@ fun WeatherDetailScreen(
                         .verticalScroll(rememberScrollState()),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Текущая погода
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -147,7 +147,6 @@ fun WeatherDetailScreen(
                         }
                     }
 
-                    // Почасовой прогноз
                     Text(
                         text = "Hourly Forecast",
                         style = MaterialTheme.typography.titleMedium.copy(
@@ -161,7 +160,6 @@ fun WeatherDetailScreen(
                         modifier = Modifier.padding(horizontal = 16.dp)
                     )
 
-                    // Прогноз на неделю
                     Text(
                         text = "7-Day Forecast",
                         style = MaterialTheme.typography.titleMedium.copy(

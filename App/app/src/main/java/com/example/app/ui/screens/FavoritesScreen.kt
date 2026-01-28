@@ -13,8 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.app.ui.components.LocationItem
-import com.example.app.ui.viewmodel.WeatherEvent
-import com.example.app.ui.viewmodel.WeatherUiState
+import com.example.app.viewmodel.WeatherEvent
+import com.example.app.viewmodel.WeatherUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

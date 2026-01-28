@@ -51,7 +51,6 @@ data class DailyWeather(
     val weathercode: List<Int>
 )
 
-// UI модель для погоды
 data class WeatherDetail(
     val location: Location,
     val current: CurrentWeather,

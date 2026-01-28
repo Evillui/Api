@@ -1,8 +1,8 @@
 package com.example.app.data.api
 
-import com.example.app.stubs.GET
-import com.example.app.stubs.Query
 import com.example.app.data.model.WeatherResponse
+import retrofit2.http.GET
+import retrofit2.http.Query
 
 interface WeatherApi {
     @GET("v1/forecast")
