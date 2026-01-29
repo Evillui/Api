@@ -2,8 +2,6 @@ package com.example.app.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -13,7 +11,6 @@ import com.example.app.ui.screens.FavoritesScreen
 import com.example.app.ui.screens.WeatherDetailScreen
 import com.example.app.ui.screens.WeatherListScreen
 import com.example.app.viewmodel.WeatherEvent
-import com.example.app.viewmodel.WeatherUiState
 import com.example.app.viewmodel.WeatherViewModel
 
 object Routes {
@@ -27,7 +24,7 @@ object Routes {
 @Composable
 fun AppNavigation(viewModel: WeatherViewModel) {
     val navController = rememberNavController()
-    val uiState by viewModel.uiState.observeAsState(WeatherUiState())
+    val uiState = viewModel.uiState
 
     NavHost(
         navController = navController,

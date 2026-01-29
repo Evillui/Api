@@ -1,7 +1,8 @@
 package com.example.app.viewmodel
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.app.data.api.ApiResult
@@ -16,8 +17,8 @@ class WeatherViewModel(
     private val repository: WeatherRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableLiveData(WeatherUiState())
-    val uiState: LiveData<WeatherUiState> = _uiState
+    var uiState by mutableStateOf(WeatherUiState())
+        private set
 
     private var searchJob: Job? = null
 
@@ -26,8 +27,9 @@ class WeatherViewModel(
             is WeatherEvent.SearchLocation -> searchLocations(event.query)
             is WeatherEvent.OpenDetail -> openDetail(event.id)
             is WeatherEvent.ToggleFavorite -> toggleFavorite(event.location)
+
             WeatherEvent.ClearSearch -> {
-                _uiState.value = state().copy(
+                uiState = uiState.copy(
                     searchQuery = "",
                     locations = emptyList(),
                     isEmpty = false,
@@ -35,8 +37,9 @@ class WeatherViewModel(
                     isLoading = false
                 )
             }
+
             WeatherEvent.RefreshWeather -> {
-                state().selectedLocation?.let { loadWeather(it) }
+                uiState.selectedLocation?.let { loadWeather(it) }
             }
         }
     }
@@ -46,7 +49,7 @@ class WeatherViewModel(
         searchJob = viewModelScope.launch {
             delay(400)
 
-            _uiState.value = state().copy(
+            uiState = uiState.copy(
                 searchQuery = query,
                 isLoading = true,
                 error = null,
@@ -54,7 +57,7 @@ class WeatherViewModel(
             )
 
             if (query.length < 2) {
-                _uiState.value = state().copy(
+                uiState = uiState.copy(
                     locations = emptyList(),
                     isLoading = false,
                     isEmpty = false
@@ -64,33 +67,34 @@ class WeatherViewModel(
 
             when (val result = repository.searchLocations(query)) {
                 is ApiResult.Success -> {
-                    _uiState.value = state().copy(
+                    uiState = uiState.copy(
                         isLoading = false,
                         locations = result.data,
                         isEmpty = result.data.isEmpty(),
                         error = null
                     )
                 }
+
                 is ApiResult.Error -> {
-                    _uiState.value = state().copy(
+                    uiState = uiState.copy(
                         isLoading = false,
                         error = result.message,
                         locations = emptyList(),
                         isEmpty = false
                     )
                 }
+
                 else -> Unit
             }
         }
     }
 
     private fun openDetail(id: Int) {
-        val s = state()
-        val loc = s.locations.firstOrNull { it.id == id }
-            ?: s.favorites.firstOrNull { it.id == id }
+        val loc = uiState.locations.firstOrNull { it.id == id }
+            ?: uiState.favorites.firstOrNull { it.id == id }
 
         if (loc == null) {
-            _uiState.value = s.copy(
+            uiState = uiState.copy(
                 errorDetail = "Location not found",
                 weatherDetail = null,
                 isLoadingDetail = false,
@@ -104,7 +108,7 @@ class WeatherViewModel(
 
     private fun loadWeather(location: Location) {
         viewModelScope.launch {
-            _uiState.value = state().copy(
+            uiState = uiState.copy(
                 selectedLocation = location,
                 isLoadingDetail = true,
                 errorDetail = null
@@ -112,35 +116,31 @@ class WeatherViewModel(
 
             when (val result = repository.getWeather(location)) {
                 is ApiResult.Success -> {
-                    _uiState.value = state().copy(
+                    uiState = uiState.copy(
                         isLoadingDetail = false,
                         weatherDetail = result.data,
                         errorDetail = null
                     )
                 }
+
                 is ApiResult.Error -> {
-                    _uiState.value = state().copy(
+                    uiState = uiState.copy(
                         isLoadingDetail = false,
                         errorDetail = result.message,
                         weatherDetail = null
                     )
                 }
+
                 else -> Unit
             }
         }
     }
 
     private fun toggleFavorite(location: Location) {
-        val s = state()
-        val favorites = s.favorites.toMutableSet()
-
-        if (favorites.contains(location)) favorites.remove(location)
-        else favorites.add(location)
-
-        _uiState.value = s.copy(favorites = favorites)
+        val favorites = uiState.favorites.toMutableSet()
+        if (favorites.contains(location)) favorites.remove(location) else favorites.add(location)
+        uiState = uiState.copy(favorites = favorites)
     }
-
-    private fun state(): WeatherUiState = _uiState.value ?: WeatherUiState()
 }
 
 data class WeatherUiState(

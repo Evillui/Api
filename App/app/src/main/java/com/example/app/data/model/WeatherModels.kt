@@ -3,7 +3,7 @@ package com.example.app.data.model
 import com.google.gson.annotations.SerializedName
 
 data class LocationResponse(
-    val results: List<Location>
+    val results: List<Location>? = null
 )
 
 data class Location(

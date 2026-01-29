@@ -7,13 +7,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.app.data.repository.WeatherRepository
 import com.example.app.di.AppModule
 import com.example.app.ui.navigation.AppNavigation
 import com.example.app.ui.theme.WeatherAppTheme
 import com.example.app.viewmodel.WeatherViewModel
+import com.example.app.viewmodel.WeatherViewModelFactory
 
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -21,7 +24,7 @@ class MainActivity : ComponentActivity() {
             geocodingApi = AppModule.geocodingApi,
             weatherApi = AppModule.weatherApi
         )
-        val viewModel = WeatherViewModel(repository)
+        val factory = WeatherViewModelFactory(repository)
 
         setContent {
             WeatherAppTheme {
@@ -29,7 +32,8 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    AppNavigation(viewModel = viewModel)
+                    val weatherVM: WeatherViewModel = viewModel(factory = factory)
+                    AppNavigation(viewModel = weatherVM)
                 }
             }
         }
